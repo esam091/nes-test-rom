@@ -1,0 +1,96 @@
+; header
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+; load this at $8000
+* = $8000
+
+; Graphics data.
+; Each line is a character:
+; space H E L O , W R D !
+chrdata:
+.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+.byte 0,102,102,126,102,102,102,0,0,0,0,0,0,0,0,0
+.byte 0,126,96,120,96,96,126,0,0,0,0,0,0,0,0,0
+.byte 0,0,0,0,0,0,0,0,0,96,96,96,96,96,126,0
+.byte 0,60,102,102,102,102,60,0,0,60,102,102,102,102,60,0
+.byte 0,0,0,0,0,24,24,48,0,0,0,0,0,0,0,0
+.byte 0,102,102,102,102,126,102,0,0,0,0,0,0,0,0,0
+.byte 0,124,102,124,120,108,102,0,0,0,0,0,0,0,0,0
+.byte 0,124,102,102,102,102,124,0,0,0,0,0,0,0,0,0
+.byte 0,24,24,24,24,0,24,0,0,0,0,0,0,0,0,0
+.byte $ff
+
+; The message "Hello, World!",
+; chosen from the characters above.
+message:
+.byte 1,2,3,3,4,5,0,6,4,7,3,8,9,$ff
+
+; Colors
+palette:
+.byte 13,32,$0a,$06, 0,0,0,0, 0,0,0,0, 0,0,0,0
+
+; the beginning
+int_reset:
+	; load graphics data into CHR-RAM
+	lda #0
+	sta $2006
+	sta $2006
+	ldx #0
+ldc:	lda chrdata,x
+	cmp #$ff
+	beq cdone
+	sta $2007
+	inx
+	jmp ldc
+cdone:
+	
+	; write the message to the name table
+	lda #$20
+	sta $2006
+	sta $2006
+	ldx #0
+ldm:	lda message,x
+	cmp #$ff
+	beq mdone
+	sta $2007
+	inx
+	jmp ldm
+mdone:
+	
+	; load the palette
+	lda #$3f
+	sta $2006
+	lda #$00
+	sta $2006
+	ldx #0
+ldp:	lda palette,x
+	sta $2007
+	inx
+	cpx #$10
+	bne ldp
+
+	; reset PPU pointer
+	; (otherwise everything is offset)
+	lda #0
+	sta $2006
+	sta $2006
+	
+	; enable PPU
+	lda #%10001000
+	sta $2000
+	lda #%00011110
+	sta $2001
+	
+	; done, just wait around
+main:	jmp main
+
+; these interrupts aren't needed for this program
+int_vblank:
+int_irqbrk:
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+
+; except for the interrupt vectors
+.word int_vblank, int_reset, int_irqbrk
