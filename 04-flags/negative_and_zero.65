@@ -109,6 +109,14 @@ palette_table:
     bne fail
     bne fail
 
+    lda #$80
+    sta $3000
+    lda #0
+    bne fail
+    bmi fail
+    bit $3000
+    bpl fail
+
 ok:
     lda #$20
     sta $2006
