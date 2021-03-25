@@ -51,8 +51,63 @@ palette_table:
     cpx #$10
     bne palette_table
     
+    ; logic test here
+    lda #0  ; sets zero flag on
+    bne fail
+    lda #1  ; sets zero flag off
+    beq fail
+    bmi fail
+    
+    lda #$ff ; bit 7 is set
+    bpl fail ; negative flag is on
+
+    ldx #0  ; turn negative flag off again
+    bmi fail
+
+    dex         ; -1
+    bpl fail
+    beq fail
+
+    inx         ; 0 again
+    bmi fail
+    bne fail
+
     lda #0
-    beq ok
+    eor #$80
+    bpl fail
+
+    lda #5
+    sbc #3
+    bmi fail
+    sbc #2
+    bmi fail
+    bne fail
+    sbc #1
+    bpl fail
+    beq fail
+    
+    ldx #$ff
+    lda #0
+    bne fail
+    bmi fail
+    txa
+    bpl fail
+    beq fail
+
+    lda #$ff
+    beq fail
+    bpl fail
+    sta $1000
+    inc $1000
+    bne fail
+    bmi fail
+
+    ; branching multiple times does not reset the flags
+    lda #0
+    bne fail
+    bne fail
+    bne fail
+    bne fail
 
 ok:
     lda #$20
@@ -75,24 +130,6 @@ fail:
     lda #4
     sta $2007
     jmp done
-
-; .byte 00000000 00000000
-; .byte 00000000 00001110
-; .byte 00000000 00011100
-; .byte 00111000 00111000
-; .byte 00011100 01110000
-; .byte 00001110 11100000
-; .byte 00000011 11000000
-; .byte 00000001 10000000
-
-; .byte 00000000 00011100
-; .byte 00011000 00111000
-; .byte 00001100 01110000
-; .byte 00000110 11100000
-; .byte 00000001 10000000
-; .byte 00001110 11100000
-; .byte 00011100 01110000
-; .byte 00111000 00000000
 
 done:
     ; reset PPU 
