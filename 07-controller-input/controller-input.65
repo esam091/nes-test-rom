@@ -1,0 +1,97 @@
+; header
+.byte $4e, $45, $53, $1a, 01, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+* = $8000
+
+symbols:
+.byte 0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8
+
+palette:
+.byte 13, 5, 0, 0, 0, $1b, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+int_reset:
+
+ldx #0
+lda #$20
+sta $2006
+lda #0
+sta $2006
+
+load_symbols:
+    lda symbols, x
+    sta $2007
+    inx
+    cpx #16
+    bne load_symbols
+
+ldx #0
+lda #$3f
+sta $2006
+lda #00
+sta $2006
+
+load_palettes:
+    lda palette, x
+    sta $2007
+    inx
+    cpx #16
+    bne load_palettes
+
+; reset PPU
+lda #0
+sta $2006
+sta $2006
+
+; enable PPU
+lda #%10001000
+sta $2000
+lda #%00011110
+sta $2001
+
+lda #$23
+sta $2006
+lda #$c1
+sta $2006
+
+
+
+main: jmp main
+
+; unused interrupts
+int_vblank:
+int_irqbrk:
+	rti
+
+.dsb $bffa-*, 0
+
+.word int_vblank, int_reset, int_irqbrk
+
+chrdata:
+.byte 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0
+
+;A
+.byte 0,$7e,$43,$c3,$c3,$c3,$7b,0, 0,0,0,0,0,0,0,0
+
+;B
+.byte $c0,$c0,$de,$e3,$c3,$c3,$7e,0, 0,0,0,0,0,0,0,0
+
+;SELECT
+.byte 0,0,0,$ff,$ff,0,0,0, 0,0,0,0,0,0,0,0
+
+;START
+.byte $18,$18,$18,$ff,$ff,$18,$18,$18, 0,0,0,0,0,0,0,0
+
+;UP
+.byte $18,$3c,$7e,$ff,$18,$18,$18,$18, 0,0,0,0,0,0,0,0
+
+;DOWN
+.byte $18,$18,$18,$18,$ff,$7e,$3c,$18, 0,0,0,0,0,0,0,0
+
+;LEFT
+.byte $10,$30,$70,$ff,$ff,$70,$30,$10, 0,0,0,0,0,0,0,0
+
+;RIGHT
+.byte $8,$c,$e,$ff,$ff,$e,$c,$8, 0,0,0,0,0,0,0,0
+
+chrdata_end:
+.dsb $e000-chrdata_end, 0
