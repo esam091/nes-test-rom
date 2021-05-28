@@ -51,11 +51,94 @@ sta $2001
 main: jmp main
 
 int_vblank:
-    lda #$23
-    sta $2006
-    lda #$c0
-    sta $2006
+    lda #0
+    sta $00
+    sta $01
+    sta $02
+    sta $03
+
     lda #1
+    sta $4016
+    lda #0
+    sta $4016
+
+a:
+    lda $4016
+    lsr
+    bcc b
+    lda $00
+    ora #1
+    sta $00
+
+b:
+    lda $4016
+    and #1
+    beq select
+    lda $00
+    ora #4
+    sta $00
+
+select:
+    lda $4016
+    lsr
+    bcc start
+    lda $01
+    ora #1
+    sta $01
+
+start:
+    lda $4016
+    and #1
+    beq up
+    lda $01
+    ora #4
+    sta $01
+
+up:
+    lda $4016
+    lsr
+    bcc down
+    lda $02
+    ora #1
+    sta $02
+
+down:
+    lda $4016
+    and #1
+    beq left
+    lda $02
+    ora #4
+    sta $02
+
+left:
+    lda $4016
+    lsr
+    bcc right
+    lda $03
+    ora #1
+    sta $03
+
+right:
+    lda $4016
+    lsr
+    bcc render
+    lda $03
+    ora #4
+    sta $03
+
+render:
+    ldx #$23
+    stx $2006
+    ldx #$c0
+    stx $2006
+
+    lda $00
+    sta $2007
+    lda $01
+    sta $2007
+    lda $02
+    sta $2007
+    lda $03
     sta $2007
 
     lda #$0
