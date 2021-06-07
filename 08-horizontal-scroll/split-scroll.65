@@ -88,23 +88,44 @@ ldp:	lda palette,x
 	sta $2006
 	
 	; enable PPU
-	lda #%10000010
+	lda #%10000000
 	sta $2000
 	lda #%00011110
 	sta $2001
-	
-	; done, just wait around
-main:	jmp main
+
+    ldx #0
+main:	
+    wait_vblank:
+        bit $2002
+        bpl wait_vblank
+
+    ; Render the status bar
+    lda #2
+    sta $2000
+
+    lda #0
+    sta $2005
+    sta $2005
+
+    ; Wait until sprit0 hit
+    wait_sprite0:
+        bit $2002
+        bvc wait_sprite0
+
+    ; Render the game content
+    lda #0
+    sta $2000
+
+    inx
+    stx $2005
+
+    lda #0
+    sta $2005
+
+    jmp main
 
 
 int_vblank:
-    ;inc $0
-    ;lda $0
-    ;sta $2005
-    ;lda #0
-    ;sta $2005
-    rti
-
 int_irqbrk:
 	rti
 
