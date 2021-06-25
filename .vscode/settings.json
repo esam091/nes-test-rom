@@ -1,8 +1,5 @@
 {
-    "workbench.editorAssociations": [
-        {
-            "viewType": "hexEditor.hexedit",
-            "filenamePattern": "*.nes"
-        }
-    ]
+    "workbench.editorAssociations": {
+        "*.nes": "hexEditor.hexedit"
+    }
 }
