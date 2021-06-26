@@ -1,0 +1,61 @@
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+* = $8000
+C = $d5
+D = $bd
+E = $a9
+F = $9f
+G = $8E
+A = $7E
+
+pitch = $1
+current = $0
+
+song:
+.byte C, C, G, G, A, A, G, F, F, E, E, D, D, C
+
+reset:
+lda #%00000001
+sta $4015 ;enable square 1
+
+lda #%10111111 ;Duty 10, Volume F
+sta $4000
+
+ldx #0
+
+lda #%10000000
+sta $2000
+lda #0
+sta $2001
+
+main: jmp main
+
+int_vblank:
+    cpx #14
+    beq end
+
+    lda $0
+    adc #10
+    sta $0
+    bcs play_song
+    jmp end
+
+play_song:
+    clc
+    
+    
+    lda song, x
+    sta $4002
+    lda #0
+    sta $4003
+    inx
+
+end:
+    rti
+
+int_irqbrk:
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+.word int_vblank, reset, int_irqbrk

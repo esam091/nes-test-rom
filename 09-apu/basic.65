@@ -1,0 +1,42 @@
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+* = $8000
+
+reset:
+lda #%00000111
+sta $4015 ;enable square 1
+
+lda #%10111111 ;Duty 10, Volume F
+sta $4000
+
+lda #$d5    ;0C9 is a C# in NTSC mode
+sta $4002
+lda #$00
+sta $4003
+
+lda #%10111111 ;Duty 10, Volume F
+sta $4004
+
+lda #$b3    ;0C9 is a C# in NTSC mode
+sta $4006
+lda #$00
+sta $4007
+
+lda #%10000001 ;Duty 10, Volume F
+sta $4008
+
+lda #$96    ;0C9 is a C# in NTSC mode
+sta $400a
+lda #$00
+sta $400b
+
+main: jmp main
+
+; these interrupts aren't needed for this program
+int_vblank:
+int_irqbrk:
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+.word int_vblank, reset, int_irqbrk
