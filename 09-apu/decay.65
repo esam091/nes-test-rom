@@ -1,0 +1,32 @@
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+* = $8000
+
+reset:
+lda #%00001111
+sta $4015 ;enable square 1
+
+lda #%01100111
+sta $4000
+
+lda #$c9
+sta $4002
+
+lda #$00
+sta $4003
+
+;lda #%11111111
+;sta $4001
+
+
+
+main: jmp main
+
+; these interrupts aren't needed for this program
+int_vblank:
+int_irqbrk:
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+.word int_vblank, reset, int_irqbrk

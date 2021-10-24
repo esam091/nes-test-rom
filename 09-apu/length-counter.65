@@ -1,0 +1,75 @@
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+* = $8000
+
+reset:
+lda #%00001111
+sta $4015 ;enable square 1
+
+; when loop is on
+; if volume is high, the loop interval is longer
+
+; if constant is disabled, the starting volume is always the same, but the decay rate is decided by nnnn
+;lda #$7f
+;sta $4001
+;lda #$c4
+;sta $4002
+
+; clock():
+; if length > 0
+; 	length--
+; else 
+;   volume = 0
+;   return
+;
+; if constant
+; 	volume = nnnn
+; else
+;  
+; endif
+
+; when length counter  is high
+; if volume is low, it'll just stop
+; if volume > length counter, the sound would end abruptly
+;lda #%10001000
+;sta $4003
+
+;lda #%10101111
+;sta $4000
+
+;lda #$85
+;sta $4001
+
+
+
+;lda #%00111010
+;sta $400c
+
+lda #$00
+sta $400e
+
+lda #$08
+sta $400f
+
+;lda #$a4
+;sta $4002
+
+;lda #$88
+;sta $4003
+
+;lda #$8c
+;sta $4001
+
+;lda #%01000001
+;sta $4000
+
+main: jmp main
+
+; these interrupts aren't needed for this program
+int_vblank:
+int_irqbrk:
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+.word int_vblank, reset, int_irqbrk

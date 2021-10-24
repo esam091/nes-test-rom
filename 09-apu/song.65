@@ -7,18 +7,40 @@ E = $a9
 F = $9f
 G = $8E
 A = $7E
+REST = $00
 
-pitch = $1
+LENGTH_32 = $01
+LENGTH_16 = $02
+LENGTH_8  = $04
+LENGTH_QUARTER = $08
+LENGTH_HALF = $10
+LENGTH_WHOLE = $20
+
+pitch = $40
 current = $0
 
 song:
-.byte C, C, G, G, A, A, G, F, F, E, E, D, D, C
+.byte C, LENGTH_QUARTER
+.byte C, LENGTH_QUARTER
+.byte G, LENGTH_QUARTER
+.byte G, LENGTH_QUARTER 
+.byte A, LENGTH_QUARTER
+.byte A, LENGTH_QUARTER 
+.byte G, LENGTH_HALF
+.byte F, LENGTH_QUARTER
+.byte F, LENGTH_QUARTER
+.byte E, LENGTH_QUARTER
+.byte E, LENGTH_QUARTER
+.byte D, LENGTH_QUARTER
+.byte D, LENGTH_QUARTER 
+.byte C, LENGTH_WHOLE
+.byte REST, LENGTH_WHOLE
 
 reset:
 lda #%00000001
 sta $4015 ;enable square 1
 
-lda #%10111111 ;Duty 10, Volume F
+lda #%10001111 ;Duty 10, Volume F
 sta $4000
 
 ldx #0
@@ -31,23 +53,33 @@ sta $2001
 main: jmp main
 
 int_vblank:
-    cpx #14
+    cpx #15 * 2
     beq end
 
     lda $0
-    adc #10
+    adc #pitch
     sta $0
     bcs play_song
     jmp end
 
 play_song:
     clc
-    
-    
+
+    ;jmp start_note
+    cpy #0
+    beq start_note
+    dey
+    jmp end
+
+start_note:
     lda song, x
     sta $4002
-    lda #0
+    lda #%1000
     sta $4003
+    inx
+
+    ; note length
+    ldy song, x
     inx
 
 end:

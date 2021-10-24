@@ -1,0 +1,87 @@
+; header
+.byte $4e, $45, $53, $1a, 01, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+; load this at $8000
+* = $8000
+
+oam:
+.byte $1, $3, $0, $8
+.byte $1, $1, $21, $c
+.byte $2, $2, $1, $10
+.byte $2, $3, $1, $14
+.byte $3, $1, $22, $18
+.byte $3, $2, $2, $1c
+.byte $4, $3, $2, $20
+.byte $4, $4, $0, $24 
+.byte $0, $1, $0, $0
+.byte $0, $2, $20, $4
+.dsb $8100 - oam, 0
+
+palette:
+.byte $0f,$11,$12,$13, 0,$14,$15,$16, 0,$17,$18,$19, 0,$1a,$1b,$1c
+
+; the beginning
+int_reset:	
+	; load the palette
+	lda #$3f
+	sta $2006
+	lda #$10
+	sta $2006
+	ldx #0
+ldp:	lda palette,x
+	sta $2007
+	inx
+	cpx #$10
+	bne ldp
+
+	lda #0
+	sta $2003
+	
+    ;lda oam
+	;sta $4014
+    
+    ldx #0
+
+load_sprites:
+    lda oam, x
+    sta $2004
+    inx
+    cpx #0
+    bne load_sprites
+
+	
+	; reset PPU pointer
+	; (otherwise everything is offset)
+	lda #0
+	sta $2006
+	sta $2006
+	
+	; enable PPU
+	lda #%10000000
+	sta $2000
+	lda #%00011110
+	sta $2001
+	
+	; done, just wait around
+main:	jmp main
+
+; these interrupts aren't needed for this program
+int_vblank:
+int_irqbrk:
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+
+; except for the interrupt vectors
+.word int_vblank, int_reset, int_irqbrk
+
+chrdata:
+.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+.byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, 0,0,0,0,0,0,0,0
+.byte 0,0,0,0,0,0,0,0, $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+.byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+.byte $0,$0,$0,$0,$0,$ff,$ff,$ff, 0,0,0,0,0,0,0,0
+
+chrdata_end:
+.dsb $e000-chrdata_end, 0

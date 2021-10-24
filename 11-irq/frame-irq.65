@@ -1,0 +1,31 @@
+; header
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+; load this at $8000
+* = $8000
+
+int_reset:
+	lda #0
+	;sta $4017
+	;sta $4015
+	cli
+
+main:	jmp main
+
+; these interrupts aren't needed for this program
+int_vblank:
+	rti
+
+int_irqbrk:
+	lda $4015
+	inc $00
+	sei
+	nop
+	nop
+	rti
+
+; fill the rest of this bank with zeroes
+.dsb $bffa-*, 0
+
+; except for the interrupt vectors
+.word int_vblank, int_reset, int_irqbrk

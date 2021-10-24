@@ -1,0 +1,26 @@
+.byte $4e, $45, $53, $1a, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00
+
+* = $8000
+
+reset:
+lda #%00001111
+sta $4015
+
+lda #%00111010
+sta $400c
+
+lda #$0
+sta $400e
+
+lda #$08
+sta $400f
+
+
+main: jmp main
+
+int_vblank:
+int_irqbrk:
+	rti
+
+.dsb $bffa-*, 0
+.word int_vblank, reset, int_irqbrk
